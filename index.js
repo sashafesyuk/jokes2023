@@ -8,6 +8,12 @@ const server = http.createServer( (req, res) => {
     if(req.url == '/jokes' && req.method == 'GET') {
         getAllJokes(req, res);
     }
+    if(req.url.startsWith('/like')) {
+        like(req, res);
+    }
+    if(req.url.startsWith('/dislike')) {
+        dislike(req, res);
+    }
     if(req.url == '/jokes' && req.method == 'POST') {
         addJoke(req, res);
     }
@@ -41,4 +47,35 @@ function addJoke(req, res) {
         fs.writeFileSync(filePath, JSON.stringify(joke));
         res.end();
     });
+}
+function like(req, res) {
+    const params = url.parse(req.url, true).query;
+    let id = params.id;
+    console.log(id);
+
+    let fileName = path.join(dataPath, id+'.json');
+    // let filePath = path.join(dataPath, fileName);
+
+    let file = fs.readFileSync(fileName);
+    let jokeJson = Buffer.from(file).toString();
+    let joke = JSON.parse(jokeJson);
+
+    joke.likes = Number(joke.likes) + 1;
+
+    fs.writeFileSync(fileName, JSON.stringify(joke));
+}
+function dislike(req, res) {
+    const params = url.parse(req.url, true).query;
+    let id = params.id;
+
+    let fileName = path.join(dataPath, id+'.json');
+    // let filePath = path.join(dataPath, fileName);
+
+    let file = fs.readFileSync(fileName);
+    let jokeJson = Buffer.from(file).toString();
+    let joke = JSON.parse(jokeJson);
+
+    joke.dislikes = Number(joke.dislikes) + 1;
+
+    fs.writeFileSync(fileName, JSON.stringify(joke));
 }
